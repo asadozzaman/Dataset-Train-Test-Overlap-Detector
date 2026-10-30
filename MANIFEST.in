@@ -1,0 +1,8 @@
+include CONTRIBUTING.md
+include THIRD_PARTY_NOTICES.md
+recursive-include docs *.md
+recursive-include docs/assets *.svg
+recursive-include examples *.yaml *.csv *.json
+recursive-include scripts *.py
+recursive-include showcase *.html *.css *.js *.svg *.md *.json *.cjs
+prune showcase/node_modules

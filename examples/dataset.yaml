@@ -1,0 +1,7 @@
+# Illustrative local input; put your dataset under ../data/example or use --root.
+path: ../data/example
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: object

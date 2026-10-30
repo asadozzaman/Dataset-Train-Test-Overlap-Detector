@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "videosplitguard"
+version = "0.2.0a4"
+description = "Detect image, video, and session overlap across dataset splits"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["PyYAML>=6,<7", "Pillow>=10,<13"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://asadozzaman.github.io/Dataset-Train-Test-Overlap-Detector/"
+Repository = "https://github.com/asadozzaman/Dataset-Train-Test-Overlap-Detector"
+Documentation = "https://github.com/asadozzaman/Dataset-Train-Test-Overlap-Detector/tree/main/docs"
+Issues = "https://github.com/asadozzaman/Dataset-Train-Test-Overlap-Detector/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "ruff>=0.9,<1", "build>=1,<2"]
+similarity = ["numpy>=1.23,<3"]
+
+[project.scripts]
+videosplitguard = "videosplitguard.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

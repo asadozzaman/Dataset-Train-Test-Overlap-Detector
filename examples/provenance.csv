@@ -1,0 +1,4 @@
+path,video_id,session_id,evidence,source_ref
+images/train/camera_a_frame001.jpg,demo/session01/camera_a,demo/session01,verified,demo-export-manifest-v1
+images/val/camera_a_frame080.jpg,demo/session01/camera_a,demo/session01,verified,demo-export-manifest-v1
+images/test/unknown_frame.jpg,,,unverified,

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="360" viewBox="0 0 1100 360" role="img" aria-labelledby="title desc">
+  <title id="title">Dataset-Train–Test Overlap Detector</title>
+  <desc id="desc">Inspect images and shared source groups across Train, Validation and Test. Local CPU audits produce visual evidence and structured reports.</desc>
+  <rect width="1100" height="360" rx="24" fill="#123f32"/>
+  <g fill="none" stroke="#346451" opacity=".5"><path d="M680 0v360M800 0v360M920 0v360M1040 0v360M650 70h450M650 190h450M650 310h450"/></g>
+  <rect x="42" y="38" width="202" height="27" rx="13" fill="#ddedb0"/>
+  <text x="143" y="56" fill="#173e31" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="1">INSPECT YOUR SPLIT BOUNDARIES</text>
+  <text x="42" y="122" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="37" font-weight="700">Dataset-Train–Test</text>
+  <text x="42" y="169" fill="#ddedb0" font-family="Segoe UI,Arial,sans-serif" font-size="37" font-weight="700">Overlap Detector</text>
+  <text x="44" y="212" fill="#cadbd0" font-family="Segoe UI,Arial,sans-serif" font-size="17">Shared images. Similar captures. Source groups.</text>
+  <text x="44" y="241" fill="#cadbd0" font-family="Segoe UI,Arial,sans-serif" font-size="17">Evidence you can inspect before evaluation.</text>
+  <g font-family="Segoe UI,Arial,sans-serif" font-size="12" fill="#ddedb0"><text x="44" y="311">YOLO YAML</text><text x="164" y="311">CPU ONLY</text><text x="275" y="311">HTML + JSON</text><text x="416" y="311">WINDOWS + LINUX</text></g>
+  <g font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="700">
+    <rect x="689" y="57" width="151" height="58" rx="11" fill="#e1eddb"/><text x="764" y="92" text-anchor="middle" fill="#25533c">TRAIN</text>
+    <rect x="887" y="57" width="151" height="58" rx="11" fill="#dfe9f8"/><text x="962" y="92" text-anchor="middle" fill="#365a86">VALIDATION</text>
+    <path d="M764 115v34h99m99-34v34h-99v25" fill="none" stroke="#bad683" stroke-width="2"/>
+    <rect x="710" y="177" width="305" height="72" rx="12" fill="#f4f7ee"/><text x="863" y="206" fill="#184534" text-anchor="middle">IS ANY DATA SHARED?</text><text x="863" y="229" fill="#5b705e" text-anchor="middle" font-size="12" font-weight="400">Compare bytes · Review scores · Check IDs</text>
+    <path d="M863 249v23" stroke="#bad683" stroke-width="2"/>
+    <rect x="727" y="273" width="272" height="41" rx="9" fill="#ddedb0"/><text x="863" y="299" fill="#244a35" text-anchor="middle">STATUS + EVIDENCE + NEXT ACTION</text>
+  </g>
+</svg>

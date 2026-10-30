@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible audit or report problem.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Share minimal, sanitized examples. Keep private images, credentials and recording logs out of public issues.
+  - type: input
+    id: version
+    attributes:
+      label: Application, Python and operating-system versions
+      placeholder: videosplitguard 0.2.0a4; Python 3.13; Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Command and minimal configuration
+      description: Include reproduction steps and relevant YAML/CSV rows with private information removed.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected and observed behavior
+      description: Include a sanitized error or small JSON excerpt when useful.
+    validations:
+      required: true

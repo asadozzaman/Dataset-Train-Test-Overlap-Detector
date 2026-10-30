@@ -1,0 +1,43 @@
+{
+  "description": "Original OpenCV benchmark images; no transformations by this project. Source benchmark: Oxford affine evaluation. Showcase split assignments are illustrative only.",
+  "commit": "ebf9366b3845efe1e54bf2440cf238fd68905bab",
+  "benchmark_url": "https://www.robots.ox.ac.uk/~vgg/research/affine/",
+  "files": [
+    {
+      "sequence": "ubc",
+      "filename": "img1.png",
+      "url": "https://raw.githubusercontent.com/opencv/opencv_extra/ebf9366b3845efe1e54bf2440cf238fd68905bab/testdata/cv/detectors_descriptors_evaluation/images_datasets/ubc/img1.png",
+      "sha256": "3d91f79c37d261d9454c6c9a9f953a45c4c070d20f332413546e339ebf9a66d2"
+    },
+    {
+      "sequence": "ubc",
+      "filename": "img4.png",
+      "url": "https://raw.githubusercontent.com/opencv/opencv_extra/ebf9366b3845efe1e54bf2440cf238fd68905bab/testdata/cv/detectors_descriptors_evaluation/images_datasets/ubc/img4.png",
+      "sha256": "76f54214aa6464c11df15c26264fa056bea88c7c03fe5e03d43f83f05c0d42c4"
+    },
+    {
+      "sequence": "ubc",
+      "filename": "img5.png",
+      "url": "https://raw.githubusercontent.com/opencv/opencv_extra/ebf9366b3845efe1e54bf2440cf238fd68905bab/testdata/cv/detectors_descriptors_evaluation/images_datasets/ubc/img5.png",
+      "sha256": "d7ffbba9b1768f87eb38a8951749f80cba840c3fc23e40353aa1002d56647bfe"
+    },
+    {
+      "sequence": "ubc",
+      "filename": "img6.png",
+      "url": "https://raw.githubusercontent.com/opencv/opencv_extra/ebf9366b3845efe1e54bf2440cf238fd68905bab/testdata/cv/detectors_descriptors_evaluation/images_datasets/ubc/img6.png",
+      "sha256": "01bcf7e953d7a5e9aa44fd9e0d90a16ac2ca21de3d2ff91bdf132cb12adb4a2a"
+    },
+    {
+      "sequence": "leuven",
+      "filename": "img1.png",
+      "url": "https://raw.githubusercontent.com/opencv/opencv_extra/ebf9366b3845efe1e54bf2440cf238fd68905bab/testdata/cv/detectors_descriptors_evaluation/images_datasets/leuven/img1.png",
+      "sha256": "773bc8c786a9ee78716c3f0269cc28f7ff8194df44652560fe8ce166bd3fb11c"
+    },
+    {
+      "sequence": "leuven",
+      "filename": "img2.png",
+      "url": "https://raw.githubusercontent.com/opencv/opencv_extra/ebf9366b3845efe1e54bf2440cf238fd68905bab/testdata/cv/detectors_descriptors_evaluation/images_datasets/leuven/img2.png",
+      "sha256": "fec06c93c9a4c449d3db2f57480872d49361e548f6f093d3203f68f6e2d88e95"
+    }
+  ]
+}
