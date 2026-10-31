@@ -9,6 +9,9 @@ import io
 import json
 import re
 import shutil
+import subprocess
+import sys
+from importlib.metadata import version
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
@@ -33,6 +36,44 @@ def thumbnail(path: Path) -> str:
         buffer = io.BytesIO()
         image.save(buffer, "JPEG", quality=82)
     return "data:image/jpeg;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
+
+
+def save_preview(path: Path, output: Path, dataset: str) -> str:
+    """Keep previews out of the manifest and let the browser load images on demand."""
+    relative = Path("assets") / dataset / path.name
+    target = output / relative
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(base64.b64decode(thumbnail(path).split(",", 1)[1]))
+    return relative.as_posix()
+
+
+def build_record() -> dict:
+    """Record engine identity without publishing local paths or environment values."""
+    digest = hashlib.sha256()
+    for source in sorted((REPOSITORY_ROOT / "src/videosplitguard").rglob("*.py")):
+        digest.update(source.relative_to(REPOSITORY_ROOT).as_posix().encode())
+        digest.update(source.read_bytes().replace(b"\r\n", b"\n"))
+    try:
+        commit = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=REPOSITORY_ROOT, text=True
+        ).strip()
+        modified = bool(
+            subprocess.check_output(
+                ["git", "status", "--porcelain"], cwd=REPOSITORY_ROOT, text=True
+            ).strip()
+        )
+    except (OSError, subprocess.CalledProcessError):
+        commit, modified = None, None
+    return {
+        "tool": "videosplitguard",
+        "version": __version__,
+        "commit": commit,
+        "working_tree_modified": modified,
+        "engine_sha256": digest.hexdigest(),
+        "python": sys.version.split()[0],
+        "dependencies": {name: version(name) for name in ("Pillow", "PyYAML", "numpy")},
+        "platform": sys.platform,
+    }
 
 
 def public_report(
@@ -95,6 +136,15 @@ def build(output: Path, archives: Path, github_url: str | None = None) -> dict:
             expected_groups = 128 if name == "coco128" else 0
             if result["summary"]["confirmed_exact_groups"] != expected_groups:
                 raise ValueError(f"Unexpected audit result for {name}")
+            expected_count = 128 if name == "coco128" else 8
+            expected_splits = (
+                {"train": 128, "val": 128} if name == "coco128" else {"train": 4, "val": 4}
+            )
+            if (
+                result["summary"]["unique_files"] != expected_count
+                or result["summary"]["split_memberships"] != expected_splits
+            ):
+                raise ValueError(f"Unexpected file or membership count for {name}")
             if name == "coco128":
                 note = (
                     "COCO128 intentionally uses the same 128 images for Train and Validation. "
@@ -119,7 +169,7 @@ def build(output: Path, archives: Path, github_url: str | None = None) -> dict:
                             "path": member["path"],
                             "hash": finding["group_id"],
                             "splits": finding["splits"],
-                            "image": thumbnail(path),
+                            "image": save_preview(path, output, name),
                         }
                     )
             else:
@@ -131,7 +181,7 @@ def build(output: Path, archives: Path, github_url: str | None = None) -> dict:
                                 "path": path.relative_to(root).as_posix(),
                                 "hash": hashlib.sha256(path.read_bytes()).hexdigest(),
                                 "splits": [split],
-                                "image": thumbnail(path),
+                                "image": save_preview(path, output, name),
                             }
                         )
             items.sort(key=lambda item: item["filename"])
@@ -143,6 +193,7 @@ def build(output: Path, archives: Path, github_url: str | None = None) -> dict:
                 "note": note,
                 "archive_sha256": observed,
                 "archive_url": f"https://github.com/ultralytics/assets/releases/download/v0.0.0/{name}.zip",
+                "configuration": {"train": train, "val": val},
             }
             if name == "coco128":
                 original = root / "images/train2017/000000000025.jpg"
@@ -175,7 +226,7 @@ def build(output: Path, archives: Path, github_url: str | None = None) -> dict:
                 data["filename_check"] = {
                     "source_filename": original.name,
                     "source_path": original.relative_to(root).as_posix(),
-                    "image": thumbnail(original),
+                    "image": f"assets/coco128/{original.name}",
                     "hash": finding["group_id"],
                     "members": finding["members"],
                     "status": check_result["status"],
@@ -184,18 +235,108 @@ def build(output: Path, archives: Path, github_url: str | None = None) -> dict:
                     "note": check_note,
                 }
         data["similarity_examples"] = build_similarity(working, archives, output)
+    write_experiments(output, data)
     template = REPOSITORY_ROOT / "showcase"
     for filename in ("index.html", "styles.css", "app.js", "mark.svg"):
         shutil.copyfile(template / filename, output / filename)
+    shutil.copyfile(REPOSITORY_ROOT / "RESEARCH_EVIDENCE.md", output / "research-evidence.md")
     payload = json.dumps(data, ensure_ascii=True, separators=(",", ":"))
     (output / "evidence.js").write_text(
         "window.SHOWCASE_EVIDENCE=" + payload + ";\n", encoding="utf-8"
     )
+    (output / ".nojekyll").touch()
     write_credits(output, data)
     return {
         "output": str(output.resolve()),
         "datasets": {key: len(value["items"]) for key, value in data["datasets"].items()},
     }
+
+
+def write_experiments(output: Path, data: dict) -> None:
+    """Small source-backed records usable outside the website, with no image payloads."""
+    records = []
+    for name, dataset in data["datasets"].items():
+        config = f"experiments/{name}/data.yaml"
+        destination = output / config
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            f"path: {name}\ntrain: {dataset['configuration']['train']}\n"
+            f"val: {dataset['configuration']['val']}\n",
+            encoding="utf-8",
+        )
+        records.append(
+            {
+                "id": name,
+                "verification": "reproduced from checksum-verified official archive",
+                "source": dataset["archive_url"],
+                "dataset_version": "COCO train2017 subset; Ultralytics assets v0.0.0",
+                "archive_sha256": dataset["archive_sha256"],
+                "configuration": config,
+                "summary": dataset["summary"],
+                "report": f"reports/{name}.json",
+                "command": f"python -m videosplitguard audit {config} --output reports/{name}-run",
+                "caveat": dataset["note"],
+                "images": [
+                    {key: value for key, value in item.items() if key != "image"}
+                    for item in dataset["items"]
+                ],
+            }
+        )
+    for sequence in ("ubc", "leuven"):
+        sources = json.loads(
+            (REPOSITORY_ROOT / "examples/similarity_sources.json").read_text(encoding="utf-8")
+        )
+        comparisons = [e for e in data["similarity_examples"] if e["sequence"] == sequence]
+        members = {m["filename"]: m for e in comparisons for m in e["members"]}
+        config = f"experiments/{sequence}/data.yaml"
+        directory = output / config
+        directory.parent.mkdir(parents=True, exist_ok=True)
+        directory.write_text(
+            "train: img1.png\nval: "
+            + json.dumps([name for name in members if name != "img1.png"])
+            + "\n",
+            encoding="utf-8",
+        )
+        records.append(
+            {
+                "id": sequence,
+                "verification": "reproduced from checksum-verified OpenCV originals",
+                "source": sources["benchmark_url"],
+                "dataset_version": {"opencv_extra_commit": sources["commit"]},
+                "configuration": config,
+                "report": f"reports/similarity-{sequence}.json",
+                "command": f"python -m videosplitguard audit {config} --near-duplicates "
+                f"--near-threshold 6 --output reports/{sequence}-run",
+                "settings": {"near_duplicates": True, "dhash_max_distance": 6},
+                "caveat": comparisons[0]["note"],
+                "images": [
+                    {key: value for key, value in m.items() if key != "image"}
+                    for m in members.values()
+                ],
+                "comparisons": [
+                    {
+                        "files": [m["filename"] for m in e["members"]],
+                        "measurement": e["similarity"],
+                    }
+                    for e in comparisons
+                ],
+            }
+        )
+    record = {
+        "schema_version": 1,
+        "build": build_record(),
+        "publication": {
+            "rights_verified": False,
+            "note": "Redistribution terms and image-specific attribution require review. "
+            "Source accessibility is not a license. See RESEARCH_EVIDENCE.md.",
+        },
+        "reproduction": "COCO: extract the named official archive beside its data.yaml. "
+        "Benchmarks: download listed original PNGs beside their data.yaml. "
+        "Run each command from the generated site directory with the tool installed. "
+        "Use a new output directory. Exit 1 on COCO128 is expected for confirmed overlap.",
+        "experiments": records,
+    }
+    (output / "experiments.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
 
 
 def write_credits(output: Path, data: dict) -> None:
@@ -229,6 +370,10 @@ li{{margin:12px 0}}.sources{{columns:3;column-gap:24px;font-size:13px}}
 <a href="./">← Back to the showcase</a><h1>Sources and image credits</h1>
 <p>Project code and original presentation are MIT licensed. Dataset images retain their
 own original terms and are not relicensed under MIT.</p>
+<p><strong>Publication review pending:</strong> complete per-image COCO attribution
+and explicit benchmark redistribution terms have not been established. Source URLs
+and checksums verify provenance, not permission. See the repository evidence ledger
+before publishing this image-bearing artifact.</p>
 <h2>COCO images and original photographers</h2>
 <p>These images come from the official Ultralytics COCO8/COCO128 archives. COCO images
 originate from Flickr; individual image terms apply separately from annotation terms.
@@ -276,6 +421,9 @@ def build_similarity(working: Path, archives: Path, output: Path) -> list[dict]:
             if hashlib.sha256(content).hexdigest() != item["sha256"]:
                 raise ValueError(f"Unexpected benchmark checksum: {sequence}/{item['filename']}")
             (root / item["filename"]).write_bytes(content)
+            asset = output / "assets" / sequence / item["filename"]
+            asset.parent.mkdir(parents=True, exist_ok=True)
+            asset.write_bytes(content)
         (root / "train.txt").write_text("img1.png\n", encoding="utf-8")
         (root / "val.txt").write_text(
             "\n".join(item["filename"] for item in items if item["filename"] != "img1.png") + "\n",
@@ -283,7 +431,7 @@ def build_similarity(working: Path, archives: Path, output: Path) -> list[dict]:
         )
         config = root / "data.yaml"
         config.write_text("train: train.txt\nval: val.txt\n", encoding="utf-8")
-        result = audit(config, near_duplicates=True)
+        result = audit(config, near_duplicates=True, near_threshold=6)
         if result["summary"]["confirmed_exact_groups"] != 0:
             raise ValueError("Benchmark images unexpectedly byte-identical")
         if result["summary"]["near_duplicate_candidates"] != len(items) - 1:
@@ -308,8 +456,7 @@ def build_similarity(working: Path, archives: Path, output: Path) -> list[dict]:
                         "path": f"{sequence}/{item['filename']}",
                         "hash": item["sha256"],
                         "source_url": item["url"],
-                        "image": "data:image/png;base64,"
-                        + base64.b64encode((root / item["filename"]).read_bytes()).decode("ascii"),
+                        "image": f"assets/{sequence}/{item['filename']}",
                     }
                 )
             examples.append(

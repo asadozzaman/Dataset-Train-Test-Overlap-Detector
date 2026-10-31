@@ -4,6 +4,8 @@
  · [Automatic GitHub Pages deployment](../docs/DEPLOYMENT.md)
 
 A responsive, buildless presentation for Dataset-Train–Test Overlap Detector.
+The current revision is a local review build; public deployment awaits the source
+permissions/attribution listed in [the evidence ledger](../RESEARCH_EVIDENCE.md).
 The interactive explorer uses fresh audit results from the official COCO128 and
 COCO8 archives. Original image filenames, paths and SHA-256 digests are preserved.
 The official dataset examples retain their authentic split configuration. A separate,
@@ -34,20 +36,25 @@ The showcase has a separate Node development test suite. After building it, run:
 cd showcase
 npm ci
 npm test
+npm run test:browser
 ```
 
-The tests use a DOM implementation, without driving a browser, to verify image
+The default tests use a DOM implementation to verify image
 selection, original references, search, baseline switching, keyboard tabs, image
-dialogs, platform commands, clipboard fallback, and internal links. This does not
-verify browser layout; review desktop and mobile rendering separately when browser
-automation is available. The static site does not require Node or jsdom at runtime.
+dialogs, platform commands, clipboard fallback, internal links and experiment records.
+The optional browser command uses installed Chrome, `playwright-core` and axe to check
+five widths, keyboard behavior, accessibility rules and the real project base path.
+See [deployment documentation](../docs/DEPLOYMENT.md) for configuration and output.
+These packages are development dependencies; the static site does not require Node.
 
-If an existing GitHub repository is available, include
-`--github-url https://github.com/OWNER/REPOSITORY` during the build. Otherwise, the
-showcase accurately displays that repository publication is pending.
+For the repository link in the local-use section, include
+`--github-url https://github.com/asadozzaman/Dataset-Train-Test-Overlap-Detector`
+during the build. The hero also links to this actual project repository.
 
-The builder verifies known archive checksums, runs the real audit engine, embeds
-thumbnails, and includes portable HTML/JSON reports. Machine-specific paths and
+The builder verifies known archive checksums, runs the real audit engine, writes
+separate preview assets, and includes portable HTML/JSON reports, downloadable YAML
+configurations and `experiments.json` with checksums, runtime and measured values.
+Machine-specific paths and
 original-file links are removed from the generated public copies. Source reports
 and datasets are not modified. Nothing is uploaded by this command.
 
@@ -78,8 +85,8 @@ the repository's [third-party notices](../THIRD_PARTY_NOTICES.md) explain the so
 
 The comparison section audits unchanged UBC compression and Leuven lighting images
 from OpenCV's official test-data repository. `examples/similarity_sources.json` pins
-each source URL, Git commit and SHA-256. Original PNG bytes are embedded directly in
-the showcase, so preview re-encoding cannot obscure the comparison. Train/Validation
+each source URL, Git commit and SHA-256. Original PNG bytes are copied intact into
+separate assets, so preview re-encoding cannot obscure the comparison. Train/Validation
 memberships in these example audits are illustrative assignments, not official
 benchmark splits or proof of benchmark leakage. No source histories are invented.
 

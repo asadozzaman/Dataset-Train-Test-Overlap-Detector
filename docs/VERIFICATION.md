@@ -176,3 +176,83 @@ showcase copies contain no machine paths and keep missing provenance unverified.
 
 Full desktop/mobile browser-layout review remains incomplete because local browser
 control was disabled. DOM checks do not establish visual layout quality.
+
+
+## Phase 1 showcase revision — 2026-10-31
+
+The Python engine is unchanged. Fresh official-archive verification reproduced
+COCO128's 128 intentional groups and COCO8's zero exact groups (128/128 and 4/4
+memberships respectively). All six benchmark PNGs matched pinned digests. Fresh
+UBC SSIM results are 97.46%, 92.61%, 86.11%; Leuven is 72.01% with dHash distance 0.
+The downloadable experiment YAML files were independently populated with original
+inputs and run through the actual CLI: all four report summaries and similarity
+measurements matched. COCO128 exit 1 is expected; the other examples exit 0 with
+source histories NOT VERIFIED.
+
+Executed from the repository, with Python 3.10.10 on Windows:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/verify_public_datasets.py --output reports/phase1-20261031/public
+.\.venv\Scripts\python.exe scripts/fetch_similarity_examples.py
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m ruff check .
+.\.venv\Scripts\python.exe -m ruff format --check .
+.\.venv\Scripts\python.exe -m build
+```
+
+Results: 68 Python tests passed; lint and formatting passed; wheel and source
+archive built. No new Linux or Python 3.13 run is claimed for this website revision.
+
+The static build was generated with `scripts/build_showcase.py --github-url
+https://github.com/asadozzaman/Dataset-Train-Test-Overlap-Detector` into fresh
+subdirectories of `reports/phase1-20261031/`. It contains 39 KB of evidence metadata
+rather than embedded image payloads. Original benchmark PNG bytes are separate
+assets, verified against their source SHA-256 values by the DOM suite.
+
+With `SHOWCASE_OUTPUT` set to the absolute generated directory, executed from
+`showcase/`: `npm test` (12 passed) and `npm run test:browser` (7 browser subchecks
+plus their parent passed). Real installed Chrome loaded the site beneath the
+actual `/Dataset-Train-Test-Overlap-Detector/` prefix. Widths 320, 390, 768, 1024,
+1440 had no page-level horizontal overflow. axe WCAG 2 A/AA and 2.1 AA rules reported
+zero violations on those layouts, COCO8, the image dialog and Leuven states.
+Keyboard tab selection, search, dialog Escape/focus restoration, source assets,
+report/configuration downloads, platform commands and local HTTP links passed.
+This is automated accessibility coverage, not certification or screen-reader testing.
+
+Generated desktop/mobile screenshots were visually inspected, including real
+compression imagery after lazy images loaded. Screenshots and axe records are in
+`reports/phase1-20261031/browser/`. An initially detected keyboard-focus issue in
+scrollable command blocks was fixed before the passing run.
+
+**Phase 1 release is not yet complete:** benchmark redistribution terms and
+complete individual COCO attribution remain unresolved. See
+[the evidence ledger](../RESEARCH_EVIDENCE.md). The Pages workflow stops before
+artifact upload while `publication.rights_verified` is false; its Python guard was
+executed against the generated manifest and correctly exited 1 with the recorded
+publication reason. No deployment was
+performed during this revision; hosted CI status remains separate from local QA.
+
+
+### Visual comparison follow-up — 2026-10-31
+
+`npm test`: 13 passed. `npm run test:browser`: 8 subchecks plus parent passed.
+The new four-case explorer was checked against source evidence for filenames,
+image references, hashes, report links and measured values. Real Chrome exercised
+all four cases, keyboard navigation, technical disclosure and image enlargement;
+axe A/AA checks found no violations in each case. Five viewport widths and the
+full dataset explorer interactions passed. The browser test now waits for the
+primary comparison image; the previous image-list wait targeted a section that
+is intentionally collapsed. Screenshots are under `reports/phase1-20261031/browser/`.
+Only the website and its checks changed; no audit engine or experiment changes.
+
+
+### Source-link publication checks — 2026-10-31
+
+The owner selected a public source-link edition without hosted photos. Fresh checks:
+68 Python tests; 13 showcase DOM tests; two artifact/public-interaction tests;
+Ruff lint and formatting passed. The public export rejects raster image files,
+archives and embedded image data. Original source actions, all four comparison
+cases, five widths and axe A/AA rules were checked in real Chrome and passed.
+Image redistribution permission remains unresolved; the export records that fact.
+The full local image-preview build is retained. Pages publishes only the checked
+`showcase-public` export. Hosted run/deployment status is available in Actions.

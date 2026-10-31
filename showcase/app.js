@@ -14,17 +14,36 @@
   if (data.github_url) {
     $("github-link").href = data.github_url;
     $("github-link").hidden = false;
-    $("repository-note").textContent = "Source code and installation instructions are available in the repository.";
+    $("repository-note").textContent = "Install from source; no PyPI release. The repository quickstart documents input formats and CLI options.";
+  }
+  $("index-coco128").textContent = coco128.summary.confirmed_exact_groups;
+  $("index-coco8").textContent = coco8.summary.confirmed_exact_groups;
+  for (const sequence of ["ubc", "leuven"]) {
+    const example = data.similarity_examples.find((item) => item.sequence === sequence &&
+      (sequence !== "ubc" || item.members[1].filename === "img5.png"));
+    $(`index-${sequence}`).textContent = `${example.similarity.structural_similarity_percent.toFixed(2)}%`;
   }
   $("hero-image").src = selected.image;
   $("hero-filename").textContent = selected.filename;
   $("hero-position").textContent = `${String(coco128.items.indexOf(selected) + 1).padStart(2, "0")} / ${coco128.items.length}`;
 
   function showImage(item, label) {
+    if (data.source_links_only) {
+      const controlled = data.filename_check.members.some((member) => member.path === item.path);
+      const source = item.source_url || (controlled
+        ? `https://cocodataset.org/#explore?id=${parseInt(data.filename_check.source_filename, 10)}`
+        : /^\d{12}\.jpg$/.test(item.filename) ? `https://cocodataset.org/#explore?id=${parseInt(item.filename, 10)}` : "credits.html");
+      window.open(source, "_blank", "noopener,noreferrer");
+      return;
+    }
+
     $("modal-title").textContent = `${label} · ${item.filename}`;
     $("modal-image").src = item.image;
     $("modal-image").alt = `${label}: ${item.filename}, original dataset image`;
     $("modal-reference").textContent = item.path;
+    $("modal-image-note").textContent = item.path.endsWith(".png")
+      ? "Original benchmark PNG bytes. Illustrative split assignments; source history remains unverified."
+      : "Resized display preview. Original filename preserved; source-record image terms apply.";
     $("modal-credit-link").href = item.source_url || (/^\d{12}\.jpg$/.test(item.filename)
       ? `https://cocodataset.org/#explore?id=${parseInt(item.filename, 10)}` : "credits.html");
     modal.showModal();
@@ -47,6 +66,89 @@
     }
     $("filename-original").textContent = filenameCheck.source_filename;
   }
+
+  const caseNames = ["renamed", "compression", "lighting", "separate"];
+  let currentCase = "renamed";
+  function selectCase(name, focus = false) {
+    currentCase = name;
+    const similarity = data.similarity_examples.find((example) =>
+      example.sequence === (name === "lighting" ? "leuven" : "ubc") &&
+      (name === "lighting" || example.members[1].filename === "img5.png"));
+    let members, report, json, title, setup, result, meaning, boundary, measurements;
+    const cocoSource = (filename) => `https://cocodataset.org/#explore?id=${parseInt(filename, 10)}`;
+    if (name === "renamed") {
+      members = ["train", "val"].map((split) => {
+        const member = filenameCheck.members.find((item) => item.split === split);
+        return {...member, filename: member.path.split("/").pop(), image: filenameCheck.image,
+          hash: filenameCheck.hash, source_url: cocoSource(filenameCheck.source_filename)};
+      });
+      title = "One photo, saved under two filenames.";
+      setup = "Only the name changed. The image file was copied intact into a separate test dataset.";
+      result = "Exact overlap detected";
+      meaning = "The auditor found identical file bytes across Train and Validation. Changing a filename does not hide this match.";
+      boundary = "Controlled demonstration: two copies of one original COCO photo. This is separate from the official COCO split results.";
+      measurements = `${filenameCheck.groups} confirmed byte-overlap group. Both SHA-256 digests are identical. Similarity scoring is unnecessary for this exact match.`;
+      report = "reports/filename-check.html"; json = "reports/filename-check.json";
+    } else if (name === "separate") {
+      members = ["train", "val"].map((split) => {
+        const item = coco8.items.find((item) => item.splits.includes(split));
+        return {...item, source_url: cocoSource(item.filename)};
+      });
+      title = "Different images in separate splits.";
+      setup = "One Train image and one Validation image from COCO8 are shown below. The auditor checked all eight files.";
+      result = "No exact overlap found";
+      meaning = "Across all 4 Train and 4 Validation images, the auditor found zero exact cross-split groups. These two photos are examples from those splits.";
+      boundary = "Official COCO8 split assignments. A zero exact-match result does not establish freedom from other forms of leakage; recording histories remain unverified.";
+      measurements = `${coco8.summary.unique_files} unique files; ${coco8.summary.confirmed_exact_groups} exact cross-split groups. This baseline is an exact check; it does not establish visual or source independence.`;
+      report = "reports/coco8.html"; json = "reports/coco8.json";
+    } else {
+      members = similarity.members;
+      title = name === "lighting" ? "The scene is related. The lighting changed." : "Compression changed the file, while scene content remains related.";
+      setup = "Genuine benchmark images, assigned to Train and Validation here to demonstrate the local auditor.";
+      result = "Visual similarity candidate — review needed";
+      meaning = "The file bytes differ, so this is not an exact match. The optional visual check flagged the pair for inspection; it does not confirm evaluation leakage.";
+      boundary = "Illustrative split assignments, not official benchmark splits. These original benchmark variations were not created by this project.";
+      const metric = similarity.similarity;
+      measurements = `Measured SSIM: ${metric.structural_similarity_percent.toFixed(2)}%. dHash distance: ${metric.dhash_distance}/64 (candidate threshold ≤ 6). SSIM compares grayscale 128 × 128 images using 7 × 7 windows. These are appearance measurements, not leakage probabilities.`;
+      report = similarity.report; json = similarity.json;
+    }
+    $("case-title").textContent = title;
+    $("case-setup").textContent = setup;
+    $("case-result").textContent = result;
+    $("case-meaning").textContent = meaning;
+    $("case-boundary").textContent = boundary;
+    $("case-measurements").textContent = measurements;
+    $("case-report").href = report; $("case-json").href = json;
+    $("comparison-panel").dataset.kind = name === "renamed" ? "exact" : name === "separate" ? "baseline" : "candidate";
+    $("comparison-panel").setAttribute("aria-labelledby", `case-${name}`);
+    document.querySelectorAll("[data-case]").forEach((button) => {
+      const active = button.dataset.case === name;
+      button.setAttribute("aria-selected", String(active)); button.tabIndex = active ? 0 : -1;
+      if (active && focus) button.focus();
+    });
+    document.querySelector(".case-technical").open = false;
+    for (const [index, side] of ["left", "right"].entries()) {
+      const member = members[index];
+      $(`case-${side}-image`).src = member.image;
+      $(`case-${side}-image`).alt = `${index ? "Validation" : "Train"}: ${member.filename}, ${title}`;
+      $(`case-${side}-path`).textContent = member.path;
+      $(`case-${side}-hash`).textContent = member.hash;
+      $(`case-${side}-source`).href = member.source_url;
+      $(`case-${side}-context`).textContent = name === "renamed" ? "Controlled copy" : name === "separate" ? "Official split" : "Illustrative assignment";
+      $(`case-${side}-zoom`).onclick = () => showImage(member, index ? "VALIDATION" : "TRAIN");
+    }
+  }
+  document.querySelectorAll("[data-case]").forEach((button) => {
+    button.addEventListener("click", () => selectCase(button.dataset.case));
+    button.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const index = event.key === "Home" ? 0 : event.key === "End" ? 3 :
+        (caseNames.indexOf(currentCase) + (event.key === "ArrowRight" ? 1 : 3)) % 4;
+      selectCase(caseNames[index], true);
+    });
+  });
+  selectCase("renamed");
 
   function selectSimilarity(example) {
     const metric = example.similarity;
@@ -87,6 +189,37 @@
     $("similarity-options").append(button);
   }
   if (data.similarity_examples?.length) selectSimilarity(data.similarity_examples[1] || data.similarity_examples[0]);
+  document.querySelectorAll("[data-select-similarity]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const sequence = link.dataset.selectSimilarity;
+      const example = data.similarity_examples.find((item) => item.sequence === sequence &&
+        (sequence !== "ubc" || item.members[1].filename === "img5.png"));
+      selectSimilarity(example);
+      selectCase(sequence === "ubc" ? "compression" : "lighting");
+    });
+  });
+  function revealControlledCheck() {
+    if (window.location.hash === "#filename-check") $("filename-check").open = true;
+  }
+  function revealEvidenceTarget() {
+    const target = document.getElementById(window.location.hash.slice(1));
+    if (!target) return;
+    for (let node = target; node; node = node.parentElement) {
+      if (node.tagName === "DETAILS") node.open = true;
+    }
+  }
+  document.querySelectorAll('a[href^="#"]').forEach((link) => {
+    link.addEventListener("click", () => {
+      const target = document.getElementById(link.hash.slice(1));
+      for (let node = target; node; node = node.parentElement) {
+        if (node.tagName === "DETAILS") node.open = true;
+      }
+    });
+  });
+  window.addEventListener("hashchange", revealEvidenceTarget);
+  revealEvidenceTarget();
+  window.addEventListener("hashchange", revealControlledCheck);
+  revealControlledCheck();
 
   function choose(item, updateList = true) {
     selected = item;
@@ -100,7 +233,12 @@
       const tag = document.createElement("span");
       tag.className = `split-tag ${split}`;
       tag.textContent = split === "val" ? "VALIDATION" : split.toUpperCase();
-      return tag;
+      const reference = document.createElement("div");
+      reference.className = "split-reference";
+      const path = document.createElement("code");
+      path.textContent = item.path;
+      reference.append(tag, path);
+      return reference;
     });
     $("selected-memberships").replaceChildren(...memberships);
     $("selected-hash").textContent = item.hash;
@@ -187,6 +325,17 @@
     });
     $("evidence-panel").setAttribute("aria-labelledby", `tab-${name}`);
     $("overlap-inspector").hidden = name !== "coco128";
+    $("shared-split-summary").hidden = name !== "coco128";
+    $("explorer-title").innerHTML = name === "coco128"
+      ? "The same images.<br>Used in both splits."
+      : "Eight images.<br>Two separate splits.";
+    $("explorer-description").textContent = name === "coco128"
+      ? "COCO128 points Train and Validation at one shared folder. Explore how the auditor identifies the reused files."
+      : "COCO8 uses four training images and four different validation images. Inspect the files behind its zero exact-overlap result.";
+    $("shared-file-count").textContent = coco128.summary.unique_files;
+    $("shared-train-count").textContent = `${coco128.summary.split_memberships.train} images`;
+    $("shared-val-count").textContent = `${coco128.summary.split_memberships.val} images`;
+
     $("baseline-panel").hidden = name !== "coco8";
     const summary = dataset.summary;
     $("evidence-count").textContent = `${summary.confirmed_exact_groups} exact groups · ${summary.affected_memberships} affected memberships · ${summary.unique_files} unique files`;
@@ -204,17 +353,21 @@
     });
   });
   document.querySelectorAll("[data-select-dataset]").forEach((link) => {
-    link.addEventListener("click", () => selectDataset(link.dataset.selectDataset));
+    link.addEventListener("click", () => {
+      selectDataset(link.dataset.selectDataset);
+      if (link.dataset.selectDataset === "coco8") selectCase("separate");
+      else $("full-evidence").open = true;
+    });
   });
 
   const commands = {
     windows: {
-      install: "python -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install .",
-      audit: '.\\.venv\\Scripts\\videosplitguard.exe audit "data\\data.yaml" --output "reports\\first-audit"',
+      install: 'git clone https://github.com/asadozzaman/Dataset-Train-Test-Overlap-Detector.git\ncd Dataset-Train-Test-Overlap-Detector\npython -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install ".[similarity]"',
+      audit: '.\\.venv\\Scripts\\videosplitguard.exe audit "path\\to\\data.yaml" --near-duplicates --output "reports\\first-audit"',
     },
     linux: {
-      install: "python3 -m venv .venv\n.venv/bin/python -m pip install .",
-      audit: '.venv/bin/videosplitguard audit "data/data.yaml" --output "reports/first-audit"',
+      install: 'git clone https://github.com/asadozzaman/Dataset-Train-Test-Overlap-Detector.git\ncd Dataset-Train-Test-Overlap-Detector\npython3 -m venv .venv\n.venv/bin/python -m pip install ".[similarity]"',
+      audit: '.venv/bin/videosplitguard audit "path/to/data.yaml" --near-duplicates --output "reports/first-audit"',
     },
   };
   document.querySelectorAll("[data-os]").forEach((button) => {
@@ -259,4 +412,15 @@
   renderBaseline();
   choose(selected);
   selectDataset("coco128");
+  if (data.source_links_only) {
+    document.body.classList.add("source-links-view");
+    const notice = document.createElement("p");
+    notice.className = "source-publication-note section-shell";
+    notice.textContent = "This public edition contains verified audit results and links to original images. Dataset photos are not hosted here. Open an image source to inspect it.";
+    document.getElementById("main").prepend(notice);
+    document.querySelectorAll(".image-open > span").forEach((node) => { node.textContent = "Open original source ↗"; });
+    document.querySelectorAll(".image-open").forEach((node) => { node.setAttribute("aria-label", "Open original image source in a new tab"); });
+    document.querySelectorAll('img[src="source-preview.svg"]').forEach((node) => { node.setAttribute("aria-hidden", "true"); });
+    document.querySelector(".rights-note").textContent = "This edition hosts results and original-source links. The complete image-preview build remains local while image redistribution permission and individual attribution are unresolved.";
+  }
 })();

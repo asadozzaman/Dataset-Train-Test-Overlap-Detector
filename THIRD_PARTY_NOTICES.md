@@ -1,9 +1,17 @@
 # Third-party sources and image credits
 
+**2026-10-31 source review:** the input sources and checksums have been verified,
+but redistribution permission for the selected Oxford/OpenCV benchmark images
+and complete per-image COCO attribution have not been established. The full image-preview build remains local. The deployed edition hosts measured
+results and original-source links, without dataset photos or embedded previews.
+The publication exporter checks that exclusion before artifact upload.
+See [the evidence ledger](RESEARCH_EVIDENCE.md). A source-record link
+alone is not a verified license or complete photographer attribution.
+
 The [MIT license](LICENSE) covers this project's code and original presentation.
 It does not relicense third-party images or datasets. Source images remain outside
-the source repository. The showcase build downloads selected public examples and
-embeds previews or original comparison files in its deployment artifact.
+the source repository. The local showcase build downloads selected public examples for auditing and previews.
+The public exporter removes those images and previews before deployment.
 
 ## COCO, COCO8 and COCO128
 

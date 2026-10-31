@@ -15,6 +15,11 @@
 [**Explore the live showcase →**](https://asadozzaman.github.io/Dataset-Train-Test-Overlap-Detector/)
  · [Quickstart](docs/QUICKSTART.md) · [Documentation](docs/README.md) · [Report guide](docs/REPORTS.md)
 
+The public edition publishes verified results and links to original images,
+without hosting dataset photos. The local build includes image previews.
+Image redistribution terms and complete attribution remain under review; see
+[research evidence](RESEARCH_EVIDENCE.md) and [build/deployment instructions](docs/DEPLOYMENT.md).
+
 Audit Train, Validation, and Test image splits in a local YOLO dataset. Detect identical
 image files regardless of their names, review visually similar candidates, and check
 shared source-video or recording-session IDs when provenance records are available.
@@ -172,8 +177,10 @@ python -m pytest -q
 python -m build
 ```
 
-The Python suite contains **68 tests**; **10 showcase interaction checks** use Node
-and jsdom. Hosted CI covers Windows/Ubuntu and Python 3.10/3.13. These counts describe
+The Python suite contains **68 tests**; **13 showcase interaction checks** use Node
+and jsdom. An optional Chrome suite checks five responsive widths, keyboard behavior,
+project-path serving and automated accessibility. Hosted CI covers Windows/Ubuntu
+and Python 3.10/3.13. These counts describe
 automated coverage, not a guarantee of finding every leak.
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Bug reports should include a minimal

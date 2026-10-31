@@ -15,3 +15,21 @@ reports/
 .env
 .env.*
 !.env.example
+
+# Local assistant configuration and session files
+.codex/
+.claude/
+.cursor/
+.agents/
+.aider*
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.github/copilot-instructions.md
+.mcp.json
+mcp.json
+
+# Operating-system files and local logs
+.DS_Store
+Thumbs.db
+*.log
