@@ -9,25 +9,22 @@ Python service or accept uploads. Users audit new datasets with the local CLI.
 
 ## Publication modes
 
-The deployed edition contains verified measurements, configurations and original-source
-links. It includes no dataset photos or embedded previews. The local full build retains
-image previews while source redistribution terms and attribution remain unresolved.
+The deployed edition is the full image-preview build in `reports/showcase/`.
+It hosts resized COCO previews, byte-preserved benchmark PNGs and standalone reports
+with embedded previews. The owner explicitly requested visible hosted images.
+`experiments.json` records `mode: hosted_image_previews` and
+`redistributes_dataset_images: true`. The permission/attribution record remains
+incomplete, so `rights_verified` remains false; deployment is not a license claim.
+Source references and research limitations stay visible.
 
-After building and testing the full site, the workflow runs:
+An optional source-link edition can still be generated with:
 
 ```text
 python scripts/export_source_links.py --source reports/showcase --output reports/showcase-public
 ```
 
-The exporter preserves measurements and replaces photo references with an original
-project SVG explaining how to open the source. Standalone reports omit embedded
-previews and link to original source records. An artifact scan rejects raster images,
-archives and embedded image data. Only `reports/showcase-public/` is uploaded.
-
-`experiments.json` records `mode: source_links_only`,
-`redistributes_dataset_images: false`, and `rights_verified: false`. The last flag
-remains false because image permissions have not been established. This export
-mode does not grant or claim third-party redistribution permission.
+That export strips dataset assets and embedded previews. CI checks it as a separate
+export option, but **Pages uploads the full `reports/showcase/` directory**.
 
 ## Automatic publication
 
@@ -40,8 +37,8 @@ mode does not grant or claim third-party redistribution permission.
 4. Fetches pinned, checksum-verified OpenCV benchmark files.
 5. Runs the real audit engine to build the showcase and its public HTML/JSON reports.
 6. Runs the showcase's Node/jsdom interaction checks.
-7. Exports a source-link edition and verifies that it contains no dataset photos.
-8. Uploads only `reports/showcase-public/`, then deploys that artifact to Pages.
+7. Checks the optional source-link export separately.
+8. Uploads the full `reports/showcase/` build, then deploys that artifact to Pages.
 
 Generated images, archives, personal datasets, virtual environments and local reports
 stay outside Git history. The build artifact contains the deliberately selected public

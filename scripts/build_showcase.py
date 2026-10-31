@@ -326,6 +326,8 @@ def write_experiments(output: Path, data: dict) -> None:
         "schema_version": 1,
         "build": build_record(),
         "publication": {
+            "mode": "hosted_image_previews",
+            "redistributes_dataset_images": True,
             "rights_verified": False,
             "note": "Redistribution terms and image-specific attribution require review. "
             "Source accessibility is not a license. See RESEARCH_EVIDENCE.md.",
@@ -370,10 +372,10 @@ li{{margin:12px 0}}.sources{{columns:3;column-gap:24px;font-size:13px}}
 <a href="./">← Back to the showcase</a><h1>Sources and image credits</h1>
 <p>Project code and original presentation are MIT licensed. Dataset images retain their
 own original terms and are not relicensed under MIT.</p>
-<p><strong>Publication review pending:</strong> complete per-image COCO attribution
+<p><strong>Image terms review incomplete:</strong> complete per-image COCO attribution
 and explicit benchmark redistribution terms have not been established. Source URLs
 and checksums verify provenance, not permission. See the repository evidence ledger
-before publishing this image-bearing artifact.</p>
+when reviewing or reusing these third-party images.</p>
 <h2>COCO images and original photographers</h2>
 <p>These images come from the official Ultralytics COCO8/COCO128 archives. COCO images
 originate from Flickr; individual image terms apply separately from annotation terms.

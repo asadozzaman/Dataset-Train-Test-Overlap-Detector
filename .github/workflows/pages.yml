@@ -48,9 +48,9 @@ jobs:
       - name: Check showcase interactions and original image fingerprints
         working-directory: showcase
         run: npm test
-      - name: Export results and source links without dataset photos
+      - name: Build optional source-link export
         run: python scripts/export_source_links.py --source reports/showcase --output reports/showcase-public
-      - name: Verify the public artifact contains no dataset photos
+      - name: Verify the optional source-link export
         working-directory: showcase
         run: npm run test:publication
       - name: Configure Pages
@@ -58,7 +58,7 @@ jobs:
       - name: Upload only the generated public site
         uses: actions/upload-pages-artifact@v4
         with:
-          path: reports/showcase-public
+          path: reports/showcase
           retention-days: 1
 
   deploy:

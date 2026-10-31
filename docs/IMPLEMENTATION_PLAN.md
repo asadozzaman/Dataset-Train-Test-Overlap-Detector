@@ -128,3 +128,12 @@ links instead of hosted photos. Added a separate export and publication verifica
 kept the full local preview build. Fresh Python suite: 68 passed; showcase DOM: 13
 passed; public export checks: 2 passed; lint passed. Image redistribution remains
 unresolved and is not represented as approved. Next: push and verify Pages deployment.
+
+
+## Hosted image-preview follow-up — 2026-10-31
+
+The owner requested visible hosted photos instead of the source-link edition.
+Changed Pages artifact selection to the full audited build and changed asset cache
+keys so visitors receive the full evidence payload. Kept original-source credits,
+measurement integrity and the unresolved image-terms record. The optional export
+is still tested but is not published. Next action: validate and deploy this revision.

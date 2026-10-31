@@ -4,8 +4,9 @@
  · [Automatic GitHub Pages deployment](../docs/DEPLOYMENT.md)
 
 A responsive, buildless presentation for Dataset-Train–Test Overlap Detector.
-The current revision is a local review build; public deployment awaits the source
-permissions/attribution listed in [the evidence ledger](../RESEARCH_EVIDENCE.md).
+Pages publishes the full image-preview build. Image terms/attribution records
+remain under review in [the evidence ledger](../RESEARCH_EVIDENCE.md); publication
+does not mark those records verified.
 The interactive explorer uses fresh audit results from the official COCO128 and
 COCO8 archives. Original image filenames, paths and SHA-256 digests are preserved.
 The official dataset examples retain their authentic split configuration. A separate,

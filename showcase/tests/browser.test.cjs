@@ -25,7 +25,7 @@ test("public showcase works in a real browser under the GitHub Pages project pat
     fs.createReadStream(file).pipe(res);
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  t.after(() => new Promise((resolve) => server.close(resolve)));
+  t.after(() => new Promise((resolve) => { server.closeAllConnections(); server.close(resolve); }));
   const browser = await chromium.launch(process.env.SHOWCASE_BROWSER
     ? {executablePath: process.env.SHOWCASE_BROWSER, headless: true}
     : {channel: "chrome", headless: true});

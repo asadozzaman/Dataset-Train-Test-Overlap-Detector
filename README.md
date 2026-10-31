@@ -15,8 +15,8 @@
 [**Explore the live showcase →**](https://asadozzaman.github.io/Dataset-Train-Test-Overlap-Detector/)
  · [Quickstart](docs/QUICKSTART.md) · [Documentation](docs/README.md) · [Report guide](docs/REPORTS.md)
 
-The public edition publishes verified results and links to original images,
-without hosting dataset photos. The local build includes image previews.
+The public showcase hosts authentic dataset previews and benchmark comparisons,
+with verified measurements, original-source links and downloadable reports.
 Image redistribution terms and complete attribution remain under review; see
 [research evidence](RESEARCH_EVIDENCE.md) and [build/deployment instructions](docs/DEPLOYMENT.md).
 

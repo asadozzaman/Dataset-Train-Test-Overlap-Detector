@@ -256,3 +256,15 @@ cases, five widths and axe A/AA rules were checked in real Chrome and passed.
 Image redistribution permission remains unresolved; the export records that fact.
 The full local image-preview build is retained. Pages publishes only the checked
 `showcase-public` export. Hosted run/deployment status is available in Actions.
+
+
+### Hosted image-preview release — 2026-10-31
+
+At the owner's request, Pages now selects the full audited image-preview artifact.
+Fresh full-build checks passed all 13 DOM cases and all eight browser subchecks,
+including real image decoding, source fingerprints, five widths and axe A/AA rules.
+Both optional source-link export checks also passed. Image payload/cache keys were
+updated so previously cached source-link data is replaced. Publication metadata
+records hosted images and leaves redistribution-rights verification unresolved.
+Browser QA teardown closes its own HTTP connections before closing the server,
+avoiding a stalled process after completed checks. The engine is unchanged.

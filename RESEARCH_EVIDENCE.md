@@ -47,7 +47,7 @@ SSIM uses oriented grayscale 128×128 images and uniform 7×7 windows. dHash use
 - [COCO terms](https://cocodataset.org/#termsofuse): image terms differ from
   annotation terms. Original numeric IDs and source-record links are retained.
 
-**Publication remains pending source-rights verification.** Public accessibility
+**Source-rights verification remains incomplete.** Public accessibility
 and an OpenCV source URL do not establish image redistribution permission. The
 reviewed benchmark landing page and pinned OpenCV README do not supply explicit
 terms for these sequences. COCO photographer/license records are also not bundled
@@ -76,3 +76,13 @@ hosting the photos. `scripts/export_source_links.py` exports that version, strip
 embedded report previews, omits dataset assets, and retains all scientific results.
 The artifact records `source_links_only`; redistribution rights remain unverified.
 The full local visual showcase is retained. No new permission claim is made.
+
+
+## Hosted image-preview edition — 2026-10-31
+
+The owner subsequently requested that images display directly on the public site,
+superseding the source-link publication choice. Pages now publishes the full audited
+build, including COCO previews, intact benchmark PNGs and embedded report previews.
+Input checksums, measurements, source references and caveats are preserved. The
+publication manifest records this mode and keeps image rights verification false.
+The optional source-link exporter remains available separately.
